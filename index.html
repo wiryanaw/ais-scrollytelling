@@ -59,12 +59,15 @@ img { display: block; max-width: 100%; }
 nav {
   position: fixed; top: 0; left: 0; right: 0;
   height: 52px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 48px;
   background: rgba(250,246,236,0.85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   z-index: 1000;
+}
+nav .nav-inner {
+  max-width: 1100px; margin: 0 auto; padding: 0 48px;
+  height: 100%;
+  display: flex; align-items: center; justify-content: space-between;
 }
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
@@ -647,24 +650,26 @@ footer {
 
 <!-- nav -->
 <nav>
-  <div class="nav-logo">
-    <div class="dot">
-      <svg viewBox="0 0 12 12" fill="none">
-        <rect x="1" y="1" width="4" height="4" fill="white" rx="0.5"/>
-        <rect x="7" y="1" width="4" height="4" fill="white" rx="0.5"/>
-        <rect x="1" y="7" width="4" height="4" fill="white" rx="0.5"/>
-        <rect x="7" y="7" width="4" height="4" fill="white" rx="0.5" opacity="0.4"/>
-      </svg>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="dot">
+        <svg viewBox="0 0 12 12" fill="none">
+          <rect x="1" y="1" width="4" height="4" fill="white" rx="0.5"/>
+          <rect x="7" y="1" width="4" height="4" fill="white" rx="0.5"/>
+          <rect x="1" y="7" width="4" height="4" fill="white" rx="0.5"/>
+          <rect x="7" y="7" width="4" height="4" fill="white" rx="0.5" opacity="0.4"/>
+        </svg>
+      </div>
+      <span>AIS Redesign</span>
     </div>
-    <span>AIS Redesign</span>
+    <ul class="nav-links">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#design">Design</a></li>
+      <li><a href="#results">Results</a></li>
+    </ul>
+    <a class="nav-cta" href="https://bit.ly/ProtoWebAIS" target="_blank">View Prototype →</a>
   </div>
-  <ul class="nav-links">
-    <li><a href="#problem">Problem</a></li>
-    <li><a href="#research">Research</a></li>
-    <li><a href="#design">Design</a></li>
-    <li><a href="#results">Results</a></li>
-  </ul>
-  <a class="nav-cta" href="https://bit.ly/ProtoWebAIS" target="_blank">View Prototype →</a>
 </nav>
 
 <!-- ═══ HERO ═══════════════════════════════════════ -->
