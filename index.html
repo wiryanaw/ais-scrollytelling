@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Redesigning the Portal Students Dreaded — Wahyu Wiryana</title>
+
+<!-- Geist font — Cursor.com's typeface -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ─── TOKENS ─────────────────────────────────────── */
+:root {
+  --bg:         #FAF6EC;
+  --bg-2:       #F3EDDF;
+  --bg-dark:    #0d0d0d;
+  --ink:        #111110;
+  --ink-2:      #6b6b6b;
+  --ink-3:      #999;
+  --border:     rgba(0,0,0,0.10);
+  --border-2:   rgba(0,0,0,0.06);
+  --red:        #c8420a;
+  --green:      #1a6b3a;
+  --blue:       #1746a2;
+  --radius:     8px;
+  --font:       'Geist', system-ui, sans-serif;
+  --mono:       'Geist Mono', 'Courier New', monospace;
+}
+
+/* ─── RESET ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ─── PROGRESS ───────────────────────────────────── */
+#progress {
+  position: fixed; top: 0; left: 0;
+  height: 2px; width: 0%;
+  background: var(--ink);
+  z-index: 9999;
+  transition: width .08s linear;
+}
+
+/* ─── NAV ────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(250,246,236,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 1000;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 500; color: var(--ink);
+}
+.nav-logo .dot {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: var(--ink); display: grid; place-items: center;
+}
+.nav-logo .dot svg { width: 12px; height: 12px; }
+.nav-links {
+  display: flex; gap: 4px; list-style: none;
+}
+.nav-links a {
+  font-size: 13px; font-weight: 450; color: var(--ink-2);
+  padding: 4px 10px; border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-links a:hover { background: var(--border-2); color: var(--ink); }
+.nav-cta {
+  font-size: 12px; font-weight: 500;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--ink); color: var(--bg);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.nav-cta:hover { opacity: 0.8; }
+
+/* ─── LAYOUT HELPERS ─────────────────────────────── */
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+.wrap-sm { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+
+/* ─── SCROLL ANIMATION ────────────────────────────── */
+.appear {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.appear.in { opacity: 1; transform: translateY(0); }
+.appear-delay-1 { transition-delay: 0.1s; }
+.appear-delay-2 { transition-delay: 0.2s; }
+.appear-delay-3 { transition-delay: 0.3s; }
+.appear-delay-4 { transition-delay: 0.4s; }
+
+/* ─── SECTION SPACING ─────────────────────────────── */
+section { padding: 96px 0; }
+section + section { border-top: 1px solid var(--border); }
+
+/* ─── EYEBROW ─────────────────────────────────────── */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 4px 12px;
+  margin-bottom: 24px;
+}
+.eyebrow .pill-num {
+  background: var(--ink); color: var(--bg);
+  border-radius: 100px;
+  padding: 1px 7px; font-size: 10px;
+}
+
+/* ─── HERO ────────────────────────────────────────── */
+#hero {
+  min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 100px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+/* subtle radial gradient behind hero */
+#hero::before {
+  content: '';
+  position: absolute;
+  top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-label {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 400;
+  color: var(--ink-2); letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+h1 {
+  font-size: clamp(3rem, 6.5vw, 5.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  max-width: 820px;
+  margin-bottom: 24px;
+}
+h1 .strike {
+  position: relative; display: inline;
+}
+h1 .strike::after {
+  content: '';
+  position: absolute; left: 0; right: 0;
+  top: 50%; height: 3px;
+  background: var(--red);
+  transform: translateY(-50%) rotate(-1deg);
+}
+.hero-sub {
+  font-size: 17px; font-weight: 400; line-height: 1.65;
+  color: var(--ink-2); max-width: 540px; margin-bottom: 40px;
+}
+.hero-meta {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  font-family: var(--mono);
+  font-size: 11px; color: var(--ink-3);
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+.hero-meta span { display: flex; gap: 6px; }
+.hero-meta strong { color: var(--ink-2); font-weight: 500; }
+.scroll-hint {
+  position: absolute; bottom: 36px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: nudge 2.4s ease-in-out infinite;
+}
+@keyframes nudge {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(5px); }
+}
+
+/* ─── SECTION HEADING ─────────────────────────────── */
+h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; letter-spacing: -0.03em;
+  line-height: 1.1; margin-bottom: 20px;
+}
+h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+p { color: var(--ink-2); margin-bottom: 18px; line-height: 1.7; }
+p strong { color: var(--ink); font-weight: 600; }
+p:last-child { margin-bottom: 0; }
+
+/* ─── BENTO GRID ──────────────────────────────────── */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  margin: 48px 0;
+}
+.bento-cell {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  padding: 28px;
+  overflow: hidden;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.bento-cell.in { opacity: 1; transform: translateY(0); }
+.bento-cell:nth-child(2) { transition-delay: 0.08s; }
+.bento-cell:nth-child(3) { transition-delay: 0.16s; }
+.bento-cell:nth-child(4) { transition-delay: 0.24s; }
+.bento-cell:nth-child(5) { transition-delay: 0.32s; }
+.bento-cell:nth-child(6) { transition-delay: 0.40s; }
+
+.c3  { grid-column: span 3; }
+.c4  { grid-column: span 4; }
+.c5  { grid-column: span 5; }
+.c6  { grid-column: span 6; }
+.c7  { grid-column: span 7; }
+.c8  { grid-column: span 8; }
+.c12 { grid-column: span 12; }
+
+@media (max-width: 768px) {
+  .c3,.c4,.c5,.c6,.c7,.c8 { grid-column: span 12; }
+  nav .nav-links { display: none; }
+  h1 { font-size: 2.4rem; }
+}
+
+.bento-cell.dark {
+  background: var(--bg-dark);
+  border-color: rgba(255,255,255,0.08);
+  color: #fff;
+}
+.bento-cell.dark p { color: rgba(255,255,255,0.5); }
+.bento-cell.dark h3 { color: #fff; }
+
+.bento-cell.muted { background: var(--bg-2); }
+
+/* big stat inside bento */
+.big-stat {
+  font-size: 4rem; font-weight: 700;
+  letter-spacing: -0.04em; line-height: 1;
+  margin-bottom: 8px;
+}
+.big-stat.red  { color: var(--red); }
+.big-stat.green{ color: var(--green); }
+.big-stat.blue { color: var(--blue); }
+.stat-label {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--ink-3); letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+/* ─── PULL QUOTE ──────────────────────────────────── */
+.quote-block {
+  border-left: 2px solid var(--ink);
+  padding: 20px 24px; margin: 36px 0;
+  background: var(--bg-2); border-radius: 0 var(--radius) var(--radius) 0;
+}
+.quote-block p {
+  font-size: 1.2rem; line-height: 1.55;
+  color: var(--ink); font-weight: 400;
+  font-style: italic; margin-bottom: 12px;
+}
+.quote-block cite {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--ink-3); font-style: normal;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* ─── PROBLEM ITEMS ──────────────────────────────── */
+.problem-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px; margin: 32px 0;
+}
+.problem-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  opacity: 0; transform: translateX(-10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.problem-item.in { opacity: 1; transform: translateX(0); }
+.problem-item:nth-child(2) { transition-delay: 0.07s; }
+.problem-item:nth-child(3) { transition-delay: 0.14s; }
+.problem-item:nth-child(4) { transition-delay: 0.21s; }
+.problem-item:nth-child(5) { transition-delay: 0.28s; }
+.problem-item:nth-child(6) { transition-delay: 0.35s; }
+.problem-icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 6px; background: var(--bg-2);
+  border: 1px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 1rem;
+}
+.problem-label {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 4px;
+}
+.problem-desc { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+
+/* ─── VOICE CARDS (quotes) ───────────────────────── */
+.voice-grid {
+  display: flex; flex-direction: column; gap: 6px;
+  margin: 28px 0;
+}
+.voice-card {
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 14px; line-height: 1.55;
+  opacity: 0; transform: translateX(12px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  position: relative;
+}
+.voice-card.in { opacity: 1; transform: translateX(0); }
+.voice-card:nth-child(2) { transition-delay: 0.07s; }
+.voice-card:nth-child(3) { transition-delay: 0.14s; }
+.voice-card:nth-child(4) { transition-delay: 0.21s; }
+.voice-card:nth-child(5) { transition-delay: 0.28s; }
+.voice-card:nth-child(6) { transition-delay: 0.35s; }
+
+.voice-card.neg {
+  background: #fff9f7; border-color: rgba(200,66,10,0.18);
+  color: var(--ink);
+}
+.voice-card.neg::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--red); border-radius: var(--radius) 0 0 var(--radius);
+}
+.voice-card.pos {
+  background: #f4faf6; border-color: rgba(26,107,58,0.18);
+  color: var(--ink);
+}
+.voice-card.pos::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--green); border-radius: var(--radius) 0 0 var(--radius);
+}
+.voice-who {
+  display: block; margin-top: 8px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase;
+}
+
+/* ─── UCD STEPS ───────────────────────────────────── */
+.step-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px; margin: 32px 0;
+}
+.step-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.step-card.in { opacity: 1; transform: translateY(0); }
+.step-card:nth-child(2) { transition-delay: 0.1s; }
+.step-card:nth-child(3) { transition-delay: 0.2s; }
+.step-card:nth-child(4) { transition-delay: 0.3s; }
+.step-num-big {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--ink-3); letter-spacing: 0.08em;
+  margin-bottom: 16px; display: block;
+}
+.step-title {
+  font-size: 14px; font-weight: 600;
+  margin-bottom: 8px;
+}
+.step-desc { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+
+/* ─── TABLE ───────────────────────────────────────── */
+.data-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; margin: 28px 0;
+  opacity: 0; transition: opacity 0.5s ease;
+}
+.data-table.in { opacity: 1; }
+.data-table th {
+  font-family: var(--mono); font-size: 10px;
+  font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-3);
+  text-align: left; padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-2);
+  color: var(--ink-2); vertical-align: top; line-height: 1.5;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--bg-2); }
+.tag {
+  display: inline-flex; align-items: center;
+  font-family: var(--mono); font-size: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px; padding: 2px 6px;
+  color: var(--ink-2); background: var(--bg-2);
+}
+
+/* ─── PERSONA ─────────────────────────────────────── */
+.persona {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 24px; align-items: start;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  margin: 28px 0;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.persona.in { opacity: 1; transform: translateY(0); }
+.persona-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  display: grid; place-items: center; font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.persona-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.persona-role {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--ink-3); margin-bottom: 16px;
+}
+.persona-needs { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.persona-needs li {
+  font-size: 13px; color: var(--ink-2);
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.persona-needs li::before {
+  content: '→';
+  font-family: var(--mono); font-size: 12px;
+  color: var(--ink-3); flex-shrink: 0; margin-top: 1px;
+}
+
+/* ─── SCREEN COMPARE ──────────────────────────────── */
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin: 36px 0;
+}
+@media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  opacity: 0; transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.compare-card.left { transform: translateX(-16px); }
+.compare-card.right { transform: translateX(16px); }
+.compare-card.in { opacity: 1; transform: translateX(0); }
+.compare-label {
+  padding: 10px 14px;
+  font-family: var(--mono); font-size: 10px;
+  font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.compare-label .badge {
+  padding: 2px 8px; border-radius: 100px; font-size: 9px;
+}
+.compare-label.old-label { color: var(--red); background: #fff9f7; }
+.compare-label.old-label .badge { background: var(--red); color: #fff; }
+.compare-label.new-label { color: var(--green); background: #f4faf6; }
+.compare-label.new-label .badge { background: var(--green); color: #fff; }
+
+/* ─── BAR CHART ───────────────────────────────────── */
+.chart-section { margin: 40px 0; }
+.chart-title {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--ink-3); letter-spacing: 0.06em;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.bar-row { margin-bottom: 16px; }
+.bar-row-label {
+  font-size: 12px; color: var(--ink-2);
+  margin-bottom: 5px; display: flex; justify-content: space-between;
+}
+.bar-track {
+  height: 24px; background: var(--bg-2);
+  border-radius: 4px; overflow: hidden;
+  display: flex; gap: 2px;
+}
+.bar-seg {
+  height: 100%; width: 0%;
+  display: flex; align-items: center; padding: 0 8px;
+  transition: width 1.3s cubic-bezier(0.16,1,0.3,1);
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  white-space: nowrap; overflow: hidden;
+}
+.bar-seg.before { background: rgba(0,0,0,0.12); color: var(--ink); }
+.bar-seg.after  { background: var(--green); color: #fff; }
+
+/* ─── COMMENT CHART ───────────────────────────────── */
+.cm-grid { display: flex; flex-direction: column; gap: 10px; margin: 28px 0; }
+.cm-row { display: flex; align-items: center; gap: 12px; }
+.cm-lbl { font-family: var(--mono); font-size: 10px; color: var(--ink-3); width: 60px; flex-shrink: 0; }
+.cm-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.cm-bar {
+  height: 18px; width: 0%; border-radius: 3px;
+  display: flex; align-items: center; padding: 0 8px;
+  font-family: var(--mono); font-size: 9px; font-weight: 600; color: #fff;
+  white-space: nowrap; overflow: hidden;
+  transition: width 1.3s cubic-bezier(0.16,1,0.3,1);
+}
+.cm-pos  { background: var(--green); }
+.cm-neg  { background: var(--red); }
+.cm-neu  { background: #8a9dba; }
+.cm-b-pos { background: rgba(0,0,0,0.15); color: var(--ink); }
+.cm-b-neg { background: rgba(200,66,10,0.35); }
+.cm-b-neu { background: #b0b8c8; }
+
+/* ─── SUS SCALE ───────────────────────────────────── */
+.sus-wrap {
+  margin: 36px 0; max-width: 560px;
+  opacity: 0; transition: opacity 0.6s ease;
+}
+.sus-wrap.in { opacity: 1; }
+.sus-track {
+  height: 36px; display: flex; border-radius: var(--radius);
+  overflow: hidden; border: 1px solid var(--border);
+}
+.sus-zone {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 9px; color: rgba(0,0,0,0.5);
+  letter-spacing: 0.04em; text-transform: uppercase; flex-direction: column;
+  gap: 1px;
+}
+.sus-zone.z1 { background: #fbe8e2; }
+.sus-zone.z2 { background: #f8f0dc; }
+.sus-zone.z3 { background: #ddf0e4; }
+.sus-zone small { font-size: 8px; opacity: 0.6; }
+.sus-pointer-row { position: relative; height: 32px; margin-top: 2px; }
+.sus-pin {
+  position: absolute; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center;
+  transition: left 1.6s cubic-bezier(0.16,1,0.3,1);
+}
+.sus-pin-line { width: 1.5px; height: 14px; }
+.sus-pin-txt {
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  white-space: nowrap; margin-top: 2px;
+}
+.sus-axis {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 9px; color: var(--ink-3);
+  margin-top: 2px;
+}
+
+/* ─── RESULT GRID ─────────────────────────────────── */
+.result-row {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 8px; margin: 36px 0;
+}
+@media (max-width: 560px) { .result-row { grid-template-columns: 1fr; } }
+.result-card {
+  padding: 28px 24px; text-align: center;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.result-card.in { opacity: 1; transform: translateY(0); }
+.result-card:nth-child(2) { transition-delay: 0.1s; }
+.result-card:nth-child(3) { transition-delay: 0.2s; }
+.result-num {
+  font-size: 3.5rem; font-weight: 700;
+  letter-spacing: -0.04em; line-height: 1;
+  color: var(--green); display: block; margin-bottom: 8px;
+}
+.result-desc {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: 0.06em; line-height: 1.6;
+}
+
+/* ─── DARK SECTION ────────────────────────────────── */
+.dark-section {
+  background: var(--bg-dark);
+  padding: 96px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dark-section h2 { color: #fff; }
+.dark-section p { color: rgba(255,255,255,0.5); }
+.dark-section .eyebrow { color: rgba(255,255,255,0.35); border-color: rgba(255,255,255,0.1); }
+
+/* ─── LEGEND ──────────────────────────────────────── */
+.legend {
+  display: flex; gap: 18px; margin-top: 14px;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+  flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ─── DIVIDER ─────────────────────────────────────── */
+hr.div { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+/* ─── MARK ────────────────────────────────────────── */
+mark {
+  background: rgba(200,66,10,0.1);
+  padding: 1px 3px; border-radius: 3px;
+  font-style: normal;
+}
+
+/* ─── FOOTER ──────────────────────────────────────── */
+footer {
+  padding: 40px 24px; text-align: center;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--ink-3); letter-spacing: 0.04em;
+  border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<!-- progress -->
+<div id="progress"></div>
+
+<!-- nav -->
+<nav>
+  <div class="nav-logo">
+    <div class="dot">
+      <svg viewBox="0 0 12 12" fill="none">
+        <rect x="1" y="1" width="4" height="4" fill="white" rx="0.5"/>
+        <rect x="7" y="1" width="4" height="4" fill="white" rx="0.5"/>
+        <rect x="1" y="7" width="4" height="4" fill="white" rx="0.5"/>
+        <rect x="7" y="7" width="4" height="4" fill="white" rx="0.5" opacity="0.4"/>
+      </svg>
+    </div>
+    <span>AIS Redesign</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#design">Design</a></li>
+    <li><a href="#results">Results</a></li>
+  </ul>
+  <a class="nav-cta" href="https://bit.ly/ProtoWebAIS" target="_blank">View Prototype →</a>
+</nav>
+
+<!-- ═══ HERO ═══════════════════════════════════════ -->
+<section id="hero">
+  <div class="wrap-sm">
+    <div class="hero-label appear">UI/UX Research · UIN Syarif Hidayatullah Jakarta · 2022</div>
+    <h1 class="appear">The portal students <span class="strike">tolerated</span><br>dreaded every semester</h1>
+    <p class="hero-sub appear appear-delay-1">
+      Every six months, thousands of students at UIN Jakarta had to log in to AIS —
+      the Academic Information System — to pick courses, check GPA, apply for scholarships.
+      Most found it confusing, outdated, and frustrating. This is how it got fixed.
+    </p>
+    <div class="hero-meta appear appear-delay-2">
+      <span><strong>Author</strong> Wahyu Wiryana</span>
+      <span><strong>ID</strong> 11160930000022</span>
+      <span><strong>Programme</strong> Information Systems, FST</span>
+      <span><strong>Defended</strong> April 26, 2022</span>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
+      <path d="M7 3v14M3 13l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══ THE PROBLEM ═════════════════════════════════ -->
+<section id="problem">
+  <div class="wrap">
+    <div class="eyebrow appear"><span class="pill-num">01</span> The Problem</div>
+    <h2 class="appear">53% of students said the interface was unattractive. Most just gave up.</h2>
+    <p class="appear">PUSTIPANDA launched the Academic Information System in 2010. By 2022, the interface had barely changed. Prior heuristic evaluation studies and a survey of 25 students (Zulfallah & An Najjar, 2018) confirmed what students already knew.</p>
+
+    <div class="quote-block appear">
+      <p>"The AIS web interface is not user-friendly and PUSTIPANDA has not paid attention to the UI and UX aspects of the system at all."</p>
+      <cite>— Abdullah, Support Coordinator, PUSTIPANDA</cite>
+    </div>
+
+    <!-- bento stats -->
+    <div class="bento">
+      <div class="bento-cell c3">
+        <div class="big-stat red">52%</div>
+        <div class="stat-label">of students disagreed the interface was attractive</div>
+      </div>
+      <div class="bento-cell c3">
+        <div class="big-stat" style="color:var(--ink);">2010</div>
+        <div class="stat-label">year AIS launched — design unchanged for over a decade</div>
+      </div>
+      <div class="bento-cell c3">
+        <div class="big-stat blue">5</div>
+        <div class="stat-label">participants in real think-aloud usability sessions</div>
+      </div>
+      <div class="bento-cell c3">
+        <div class="big-stat green">87</div>
+        <div class="stat-label">academic references consulted for this research</div>
+      </div>
+      <!-- wide cell: real user quotes -->
+      <div class="bento-cell dark c12">
+        <div class="stat-label" style="color:rgba(255,255,255,0.35); margin-bottom:16px;">Real quotes from usability testing sessions — before redesign</div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:10px;">
+          <div style="border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:14px;">
+            <div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.75);font-style:italic;">"This font is messy and way too small — and the numbers are random, I thought it was a 5 but it was a 1."</div>
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.3);margin-top:10px;text-transform:uppercase;letter-spacing:0.06em;">Evi · Session 1</div>
+          </div>
+          <div style="border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:14px;">
+            <div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.75);font-style:italic;">"There's no message when the NIM or password is wrong. You're just left there guessing."</div>
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.3);margin-top:10px;text-transform:uppercase;letter-spacing:0.06em;">Evi · Session 1</div>
+          </div>
+          <div style="border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:14px;">
+            <div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.75);font-style:italic;">"I give up. I can't find which scholarship is still open. I'd have to open every single one."</div>
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.3);margin-top:10px;text-transform:uppercase;letter-spacing:0.06em;">Putra · Session 1</div>
+          </div>
+          <div style="border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:14px;">
+            <div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.75);font-style:italic;">"Why do I have to enter the academic year? Semester 3 — what year is that? I have to do the math myself."</div>
+            <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.3);margin-top:10px;text-transform:uppercase;letter-spacing:0.06em;">Dinda · Session 1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="appear" style="margin-top:48px; font-size:1.1rem;">Six recurring pain points surfaced</h3>
+    <div class="problem-list">
+      <div class="problem-item">
+        <div class="problem-icon">📅</div>
+        <div>
+          <div class="problem-label">Academic Year Input</div>
+          <div class="problem-desc">Students had to manually calculate which year mapped to their semester — no guidance, no default.</div>
+        </div>
+      </div>
+      <div class="problem-item">
+        <div class="problem-icon">🔀</div>
+        <div>
+          <div class="problem-label">Unordered Scholarships</div>
+          <div class="problem-desc">Opportunities were listed randomly with no deadline sorting — impossible to see what was still open.</div>
+        </div>
+      </div>
+      <div class="problem-item">
+        <div class="problem-icon">🔒</div>
+        <div>
+          <div class="problem-label">No Login Error Message</div>
+          <div class="problem-desc">Wrong NIM or password produced silence — users were left confused about what failed.</div>
+        </div>
+      </div>
+      <div class="problem-item">
+        <div class="problem-icon">🔤</div>
+        <div>
+          <div class="problem-label">Small Typography</div>
+          <div class="problem-desc">Font sizes were too small. Grade notation mixed text ("SB") and numbers with no legend.</div>
+        </div>
+      </div>
+      <div class="problem-item">
+        <div class="problem-icon">↩️</div>
+        <div>
+          <div class="problem-label">No Cancel Controls</div>
+          <div class="problem-desc">Editing personal data offered no Cancel or Back button — users got trapped in forms.</div>
+        </div>
+      </div>
+      <div class="problem-item">
+        <div class="problem-icon">🎨</div>
+        <div>
+          <div class="problem-label">Flat Visual Design</div>
+          <div class="problem-desc">No icons, no visual hierarchy, no personality. Described as "too plain and bare" by participants.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RESEARCH ════════════════════════════════════ -->
+<section id="research">
+  <div class="wrap">
+    <div class="eyebrow appear"><span class="pill-num">02</span> The Research Method</div>
+    <h2 class="appear">User-Centered Design: <br>letting users lead every decision</h2>
+    <p class="appear" style="max-width:560px;">Unlike traditional development that builds first and tests later, UCD begins with listening to people — and returns to them at every stage. Four phases, repeated iteratively until the design works.</p>
+
+    <div class="step-grid">
+      <div class="step-card">
+        <span class="step-num-big">01 / Specify Context</span>
+        <div class="step-title">Who uses AIS, and how?</div>
+        <div class="step-desc">Interviews and observations mapped real usage — who logs in, on what device, for which tasks — before any assumption was made.</div>
+      </div>
+      <div class="step-card">
+        <span class="step-num-big">02 / Specify Requirements</span>
+        <div class="step-title">What must the system do?</div>
+        <div class="step-desc">User needs from phase one were turned into concrete design requirements — an explicit list binding every decision.</div>
+      </div>
+      <div class="step-card">
+        <span class="step-num-big">03 / Produce Solutions</span>
+        <div class="step-title">Wireframes → prototypes</div>
+        <div class="step-desc">Information architecture first, then wireframes, then a high-fidelity prototype in Figma ready for real testing.</div>
+      </div>
+      <div class="step-card">
+        <span class="step-num-big">04 / Evaluate</span>
+        <div class="step-title">Did it actually improve?</div>
+        <div class="step-desc">A second round of usability testing with the same participants measured whether the redesign solved each identified problem.</div>
+      </div>
+    </div>
+
+    <hr class="div">
+
+    <h3 class="appear">How usability was measured</h3>
+    <p class="appear">Three complementary techniques measured usability across the three ISO 9241-11 dimensions.</p>
+
+    <table class="data-table appear">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>Technique</th>
+          <th>What it captures</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag">Effectiveness</span></td>
+          <td>Performance Measurement — Task Completion Rate</td>
+          <td>Did users successfully finish each task? Binary: 1 (success) or 0 (fail).</td>
+        </tr>
+        <tr>
+          <td><span class="tag">Efficiency</span></td>
+          <td>Performance Measurement — Execution Time</td>
+          <td>How long (in seconds) did each task take to complete?</td>
+        </tr>
+        <tr>
+          <td><span class="tag">Satisfaction</span></td>
+          <td>System Usability Scale (SUS) + Verbal Behavior Analysis</td>
+          <td>10-item SUS questionnaire (0–100 score) plus categorized spoken comments from think-aloud.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="div">
+    <h3 class="appear">Understanding the user — persona synthesis</h3>
+    <p class="appear">Interviews and observations were synthesized into a representative persona. Every design decision was checked against this person's needs.</p>
+
+    <div class="persona appear">
+      <div class="persona-avatar">🎓</div>
+      <div>
+        <div class="persona-name">Diah, 22</div>
+        <div class="persona-role">Active student · Tangerang · Multi-device · UIN Jakarta</div>
+        <ul class="persona-needs">
+          <li>Needs icons on menus to understand features without reading every label</li>
+          <li>Needs a clear error message when login credentials are wrong</li>
+          <li>Needs course registration that doesn't require remembering academic years</li>
+          <li>Needs scholarships sorted by deadline so she can see what's still open at a glance</li>
+          <li>Opens AIS roughly twice per semester — for KRS registration and grade checking</li>
+          <li>Confused by page errors, unsorted lists, and forms with no cancel option</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DESIGN ══════════════════════════════════════ -->
+<section id="design">
+  <div class="wrap">
+    <div class="eyebrow appear"><span class="pill-num">03</span> The Design</div>
+    <h2 class="appear">Eight requirements.<br>One redesigned system.</h2>
+    <p class="appear" style="max-width:560px;">From Diah's needs — and those of four other participants — eight requirements drove every design decision, from information architecture to the final high-fidelity prototype in Figma.</p>
+
+    <table class="data-table appear" style="margin-top:32px;">
+      <thead>
+        <tr><th>#</th><th>User Need</th><th>Design Requirement</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="tag">1</span></td><td>Understand menus at a glance</td><td>Add icons to all sidebar navigation items</td></tr>
+        <tr><td><span class="tag">2</span></td><td>See key info without hunting</td><td>Dashboard consolidating GPA, active semester, and open scholarships</td></tr>
+        <tr><td><span class="tag">3</span></td><td>Know when login fails</td><td>Inline error message on wrong NIM or password</td></tr>
+        <tr><td><span class="tag">4</span></td><td>Register courses without confusion</td><td>Direct semester picker — drop the academic year text input entirely</td></tr>
+        <tr><td><span class="tag">5</span></td><td>Find past academic activity easily</td><td>Replace year input with simple semester dropdown, pre-populated</td></tr>
+        <tr><td><span class="tag">6</span></td><td>Know which scholarships are available</td><td>Sort by deadline, show open/closed badge on each listing</td></tr>
+        <tr><td><span class="tag">7</span></td><td>Cancel editing personal data</td><td>Add Cancel and Back controls to every edit form</td></tr>
+        <tr><td><span class="tag">8</span></td><td>Interface that feels modern</td><td>Updated visual language: larger type, consistent spacing, clear hierarchy</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="div">
+    <h3 class="appear">Before vs. After</h3>
+    <p class="appear">The redesign moved through wireframes then into a high-fidelity prototype. These illustrate the key changes across the interface.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card left">
+        <div class="compare-label old-label">
+          Before — Original AIS <span class="badge">2022</span>
+        </div>
+        <svg viewBox="0 0 340 240" width="100%" style="background:#f8f8f8; display:block;">
+          <!-- old nav bar -->
+          <rect width="340" height="240" fill="#f0f0f0"/>
+          <rect y="0" width="340" height="32" fill="#2c5f8a"/>
+          <rect x="8" y="10" width="70" height="10" rx="2" fill="rgba(255,255,255,0.25)"/>
+          <rect x="90" y="12" width="44" height="7" rx="1" fill="rgba(255,255,255,0.15)"/>
+          <rect x="142" y="12" width="44" height="7" rx="1" fill="rgba(255,255,255,0.15)"/>
+          <rect x="194" y="12" width="44" height="7" rx="1" fill="rgba(255,255,255,0.15)"/>
+          <!-- tiny login top right -->
+          <rect x="290" y="10" width="44" height="12" rx="2" fill="rgba(255,255,255,0.12)"/>
+          <text x="312" y="20" font-family="Arial" font-size="7" fill="rgba(255,255,255,0.5)" text-anchor="middle">Login</text>
+          <!-- sidebar: text only -->
+          <rect x="0" y="32" width="88" height="208" fill="#e4e4e4"/>
+          <rect x="8" y="44" width="72" height="8" rx="1" fill="#b0b0b0"/>
+          <rect x="8" y="58" width="72" height="8" rx="1" fill="#b0b0b0"/>
+          <rect x="8" y="72" width="72" height="8" rx="1" fill="#b0b0b0"/>
+          <rect x="8" y="86" width="72" height="8" rx="1" fill="#b0b0b0"/>
+          <rect x="8" y="100" width="72" height="8" rx="1" fill="#b0b0b0"/>
+          <rect x="8" y="114" width="72" height="8" rx="1" fill="#b0b0b0"/>
+          <rect x="8" y="128" width="72" height="8" rx="1" fill="#b0b0b0"/>
+          <!-- main content: plain -->
+          <rect x="96" y="32" width="244" height="208" fill="#fff"/>
+          <rect x="104" y="44" width="160" height="10" rx="1" fill="#e0e0e0"/>
+          <!-- unordered list -->
+          <rect x="104" y="64" width="228" height="9" rx="1" fill="#ebebeb"/>
+          <rect x="104" y="79" width="228" height="9" rx="1" fill="#f3f3f3"/>
+          <rect x="104" y="94" width="228" height="9" rx="1" fill="#ebebeb"/>
+          <rect x="104" y="109" width="228" height="9" rx="1" fill="#f3f3f3"/>
+          <rect x="104" y="124" width="228" height="9" rx="1" fill="#ebebeb"/>
+          <!-- year input: random order -->
+          <rect x="104" y="148" width="68" height="18" rx="2" fill="#ddd"/>
+          <text x="138" y="160" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">2017/2018</text>
+          <rect x="180" y="148" width="68" height="18" rx="2" fill="#ddd"/>
+          <text x="214" y="160" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">2019/2020</text>
+          <rect x="256" y="148" width="68" height="18" rx="2" fill="#ddd"/>
+          <text x="290" y="160" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">2016/2017</text>
+          <!-- no error state label -->
+          <text x="104" y="200" font-family="Arial" font-size="9" fill="#ccc">No error feedback on failed login</text>
+          <text x="104" y="216" font-family="Arial" font-size="9" fill="#ccc">No icons in sidebar</text>
+          <text x="104" y="232" font-family="Arial" font-size="9" fill="#ccc">Scholarship list unsorted</text>
+        </svg>
+      </div>
+
+      <div class="compare-card right">
+        <div class="compare-label new-label">
+          After — Redesigned AIS <span class="badge">Prototype</span>
+        </div>
+        <svg viewBox="0 0 340 240" width="100%" style="background:#f8f8f8; display:block;">
+          <rect width="340" height="240" fill="#fafafa"/>
+          <!-- refined top bar -->
+          <rect y="0" width="340" height="32" fill="#1a1a1a"/>
+          <rect x="8" y="8" width="26" height="16" rx="4" fill="rgba(255,255,255,0.12)"/>
+          <rect x="40" y="12" width="60" height="8" rx="2" fill="rgba(255,255,255,0.2)"/>
+          <!-- avatar pill top right -->
+          <rect x="290" y="10" width="44" height="12" rx="6" fill="rgba(255,255,255,0.08)"/>
+          <circle cx="299" cy="16" r="4" fill="rgba(255,255,255,0.3)"/>
+          <rect x="306" y="13" width="24" height="6" rx="1" fill="rgba(255,255,255,0.15)"/>
+          <!-- sidebar with icons -->
+          <rect x="0" y="32" width="80" height="208" fill="#f5f5f5" stroke-width="0"/>
+          <rect x="0" y="32" width="80" height="208" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+          <!-- icon + label rows -->
+          <rect x="8"  y="44" width="16" height="16" rx="4" fill="#1a6b3a" opacity="0.7"/>
+          <rect x="28" y="48" width="44" height="7" rx="1" fill="#bbb"/>
+          <rect x="8"  y="68" width="16" height="16" rx="4" fill="#1746a2" opacity="0.5"/>
+          <rect x="28" y="72" width="44" height="7" rx="1" fill="#ccc"/>
+          <rect x="8"  y="92" width="16" height="16" rx="4" fill="#c8420a" opacity="0.5"/>
+          <rect x="28" y="96" width="44" height="7" rx="1" fill="#ccc"/>
+          <rect x="8"  y="116" width="16" height="16" rx="4" fill="#666" opacity="0.3"/>
+          <rect x="28" y="120" width="44" height="7" rx="1" fill="#ccc"/>
+          <rect x="8"  y="140" width="16" height="16" rx="4" fill="#666" opacity="0.3"/>
+          <rect x="28" y="144" width="44" height="7" rx="1" fill="#ccc"/>
+          <!-- main content: clean cards -->
+          <rect x="88" y="32" width="252" height="208" fill="#fff"/>
+          <!-- summary card row -->
+          <rect x="96" y="44" width="72" height="42" rx="6" fill="#eef9f3" stroke="#c8e6d6" stroke-width="0.8"/>
+          <text x="132" y="62" font-family="Arial" font-weight="700" font-size="13" fill="#1a6b3a" text-anchor="middle">3.72</text>
+          <text x="132" y="75" font-family="Arial" font-size="7" fill="#888" text-anchor="middle">GPA</text>
+          <rect x="176" y="44" width="72" height="42" rx="6" fill="#eef2fc" stroke="#bfcfee" stroke-width="0.8"/>
+          <text x="212" y="62" font-family="Arial" font-weight="700" font-size="11" fill="#1746a2" text-anchor="middle">Sem 6</text>
+          <text x="212" y="75" font-family="Arial" font-size="7" fill="#888" text-anchor="middle">Current</text>
+          <rect x="256" y="44" width="76" height="42" rx="6" fill="#fff5f0" stroke="#f0c8b0" stroke-width="0.8"/>
+          <text x="294" y="62" font-family="Arial" font-weight="700" font-size="11" fill="#c8420a" text-anchor="middle">2 Open</text>
+          <text x="294" y="75" font-family="Arial" font-size="7" fill="#888" text-anchor="middle">Scholarships</text>
+          <!-- semester dropdown -->
+          <rect x="96" y="100" width="232" height="16" rx="4" fill="#f5f5f5" stroke="#ddd" stroke-width="0.5"/>
+          <text x="102" y="111" font-family="Arial" font-size="8" fill="#555">Semester 6  ▾</text>
+          <!-- sorted course list -->
+          <rect x="96" y="124" width="232" height="12" rx="3" fill="#fafafa" stroke="#eee" stroke-width="0.5"/>
+          <rect x="100" y="127" width="8" height="8" rx="2" fill="#1a6b3a" opacity="0.7"/>
+          <rect x="112" y="129" width="130" height="5" rx="1" fill="#ddd"/>
+          <rect x="96" y="142" width="232" height="12" rx="3" fill="#fafafa" stroke="#eee" stroke-width="0.5"/>
+          <rect x="100" y="145" width="8" height="8" rx="2" fill="#1a6b3a" opacity="0.7"/>
+          <rect x="112" y="147" width="100" height="5" rx="1" fill="#ddd"/>
+          <!-- error message -->
+          <rect x="96" y="164" width="232" height="16" rx="4" fill="#fff0ed" stroke="#f5b8a8" stroke-width="0.5"/>
+          <text x="102" y="175" font-family="Arial" font-size="8" fill="#c8420a">⚠ Wrong NIM or password. Please try again.</text>
+          <!-- buttons -->
+          <rect x="96" y="190" width="90" height="18" rx="5" fill="#1a1a1a"/>
+          <text x="141" y="202" font-family="Arial" font-size="8" fill="#fff" text-anchor="middle" font-weight="700">Save Changes</text>
+          <rect x="194" y="190" width="70" height="18" rx="5" fill="none" stroke="#ddd" stroke-width="1"/>
+          <text x="229" y="202" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Cancel</text>
+        </svg>
+      </div>
+    </div>
+
+    <p class="appear" style="font-family:var(--mono); font-size:11px; color:var(--ink-3); margin-top:12px;">
+      Illustrative mockups based on described UI changes. Full prototype → <strong>https://bit.ly/ProtoWebAIS</strong>
+    </p>
+  </div>
+</section>
+
+<!-- ═══ RESULTS ═════════════════════════════════════ -->
+<section id="results">
+  <div class="wrap">
+    <div class="eyebrow appear"><span class="pill-num">04</span> The Results</div>
+    <h2 class="appear">Every metric moved<br>in the right direction.</h2>
+    <p class="appear" style="max-width:560px;">After testing the high-fidelity prototype against the same tasks and the same participants, the numbers were unambiguous. The redesign didn't just look better — it measurably worked better.</p>
+
+    <div class="result-row">
+      <div class="result-card">
+        <span class="result-num">+18%</span>
+        <div class="result-desc">Effectiveness<br>Task completion rate</div>
+      </div>
+      <div class="result-card">
+        <span class="result-num">+18%</span>
+        <div class="result-desc">Efficiency<br>Time on task improved</div>
+      </div>
+      <div class="result-card">
+        <span class="result-num">+56<span style="font-size:2rem">pts</span></span>
+        <div class="result-desc">Satisfaction<br>SUS score increase</div>
+      </div>
+    </div>
+
+    <!-- bar chart: task completion -->
+    <div class="chart-section appear">
+      <div class="chart-title">Task Completion Rate — Before vs. After</div>
+      <div class="bar-row">
+        <div class="bar-row-label"><span>Login</span></div>
+        <div class="bar-track">
+          <div class="bar-seg before" data-w="60">60%</div>
+          <div class="bar-seg after"  data-w="100">100%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label"><span>Find and register a course (KRS)</span></div>
+        <div class="bar-track">
+          <div class="bar-seg before" data-w="80">80%</div>
+          <div class="bar-seg after"  data-w="100">100%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label"><span>Find past academic activity</span></div>
+        <div class="bar-track">
+          <div class="bar-seg before" data-w="60">60%</div>
+          <div class="bar-seg after"  data-w="80">80%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-row-label"><span>Apply for a scholarship</span></div>
+        <div class="bar-track">
+          <div class="bar-seg before" data-w="40">40%</div>
+          <div class="bar-seg after"  data-w="100">100%</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(0,0,0,0.12)"></div>Before redesign</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>After redesign</div>
+      </div>
+    </div>
+
+    <hr class="div">
+
+    <!-- comment analysis -->
+    <h3 class="appear">Verbal feedback shifted dramatically</h3>
+    <p class="appear">Every spoken comment during think-aloud sessions was catalogued as positive, neutral, or negative. Positive comments jumped from 22% to 86% — negative fell to near zero.</p>
+
+    <div class="cm-grid appear">
+      <div class="cm-row">
+        <div class="cm-lbl">Positive</div>
+        <div class="cm-bars">
+          <div class="cm-bar cm-b-pos" data-w="22">Before 22%</div>
+          <div class="cm-bar cm-pos"   data-w="86">After 86%</div>
+        </div>
+      </div>
+      <div class="cm-row">
+        <div class="cm-lbl">Neutral</div>
+        <div class="cm-bars">
+          <div class="cm-bar cm-b-neu" data-w="33">Before 33%</div>
+          <div class="cm-bar cm-neu"   data-w="12">After 12%</div>
+        </div>
+      </div>
+      <div class="cm-row">
+        <div class="cm-lbl">Negative</div>
+        <div class="cm-bars">
+          <div class="cm-bar cm-b-neg" data-w="45">Before 45%</div>
+          <div class="cm-bar cm-neg"   data-w="3">3%</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="div">
+
+    <!-- what they said after -->
+    <h3 class="appear">What participants said — after the redesign</h3>
+    <div class="voice-grid">
+      <div class="voice-card pos">"Way easier — I just pick the semester directly instead of calculating the academic year."<span class="voice-who">Naza · Session 2</span></div>
+      <div class="voice-card pos">"I like the scholarship menu — the list is up to date and not messy anymore."<span class="voice-who">Evi · Session 2</span></div>
+      <div class="voice-card pos">"The icons in the menu bar are a simple addition, but they make it feel so much better and more organised."<span class="voice-who">Putra · Session 2</span></div>
+      <div class="voice-card pos">"The login form is bigger — not tiny and in the corner. Much clearer."<span class="voice-who">Naza · Session 2</span></div>
+      <div class="voice-card pos">"The scholarship button makes it obvious which ones are still open — I don't have to click into each one."<span class="voice-who">Evi · Session 2</span></div>
+    </div>
+
+    <hr class="div">
+
+    <!-- SUS gauge -->
+    <h3 class="appear">System Usability Scale — crossing the benchmark</h3>
+    <p class="appear">The SUS average benchmark is <strong style="color:var(--ink);">68</strong>. Below that, a system is considered below average. The original AIS fell well short. The redesign crossed into the acceptable zone.</p>
+
+    <div class="sus-wrap appear">
+      <div class="sus-track">
+        <div class="sus-zone z1">Not Acceptable<small>0 – 50</small></div>
+        <div class="sus-zone z2">Marginal<small>51 – 70</small></div>
+        <div class="sus-zone z3">Acceptable<small>71 – 100</small></div>
+      </div>
+      <div class="sus-pointer-row">
+        <div class="sus-pin" id="pin-before" style="left:0%">
+          <div class="sus-pin-line" style="background:var(--red)"></div>
+          <div class="sus-pin-txt" style="color:var(--red)">Before ~44</div>
+        </div>
+        <div class="sus-pin" id="pin-after" style="left:0%">
+          <div class="sus-pin-line" style="background:var(--green)"></div>
+          <div class="sus-pin-txt" style="color:var(--green)">After ~72</div>
+        </div>
+      </div>
+      <div class="sus-axis">
+        <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ CONCLUSION ══════════════════════════════════ -->
+<div class="dark-section">
+  <div class="wrap-sm">
+    <div class="eyebrow appear">Conclusion</div>
+    <h2 class="appear" style="font-size:clamp(2rem,4vw,3rem);">Good design isn't decoration.<br>It's respect for the user's time.</h2>
+    <p class="appear" style="font-size:1.05rem; line-height:1.7; margin-top:20px;">
+      This research demonstrated that a structured, evidence-based redesign process — one that begins by listening to real users — can transform an interface students dread into one that actually helps them succeed academically.
+    </p>
+    <p class="appear">
+      The gains weren't superficial. Task completion rose 18%. Efficiency improved 18%. Satisfaction jumped 56 points. Negative comments fell 42%. These numbers represent thousands of students spending less time fighting a broken portal, and more time focused on their studies.
+    </p>
+    <div class="appear" style="margin-top:40px; padding:20px; border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius); background:rgba(255,255,255,0.03);">
+      <div style="font-family:var(--mono); font-size:10px; color:rgba(255,255,255,0.3); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.08em;">Prototype</div>
+      <div style="font-family:var(--mono); font-size:13px; color:rgba(255,255,255,0.6);">https://bit.ly/ProtoWebAIS — ready for implementation by PUSTIPANDA</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Wahyu Wiryana · 11160930000022 · Information Systems, FST · UIN Syarif Hidayatullah Jakarta · 2022
+</footer>
+
+<script>
+// ── progress bar ──────────────────────────────────
+const prog = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+  prog.style.width = Math.min(pct, 100) + '%';
+}, { passive: true });
+
+// ── intersection observer for .appear ─────────────
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.appear,.bento-cell,.problem-item,.voice-card,.step-card,.result-card,.compare-card,.persona,.data-table,.sus-wrap').forEach(el => io.observe(el));
+
+// ── bar charts ─────────────────────────────────────
+const chartIO = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.querySelectorAll('[data-w]').forEach(bar => {
+      bar.style.width = bar.dataset.w + '%';
+    });
+    chartIO.unobserve(e.target);
+  });
+}, { threshold: 0.25 });
+document.querySelectorAll('.chart-section,.cm-grid').forEach(el => chartIO.observe(el));
+
+// ── SUS gauge ──────────────────────────────────────
+const susIO = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    setTimeout(() => {
+      document.getElementById('pin-before').style.left = '44%';
+      document.getElementById('pin-after').style.left  = '72%';
+    }, 400);
+    susIO.unobserve(e.target);
+  });
+}, { threshold: 0.3 });
+const susEl = document.querySelector('.sus-wrap');
+if (susEl) susIO.observe(susEl);
+</script>
+</body>
+</html>
