@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Superellipse clip -->
+    <clipPath id="sq">
+      <rect width="512" height="512" rx="116" ry="116"/>
+    </clipPath>
+
+    <!-- Background gradient: warm cream → deep terracotta -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#FAF0DC"/>
+      <stop offset="50%"  stop-color="#E8873A"/>
+      <stop offset="100%" stop-color="#C8420A"/>
+    </linearGradient>
+
+    <!-- Subtle inner glow on bg -->
+    <radialGradient id="glow" cx="40%" cy="30%" r="55%">
+      <stop offset="0%"   stop-color="#FFF4E0" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <!-- Scroll body gradient -->
+    <linearGradient id="scrollGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFDF7"/>
+      <stop offset="100%" stop-color="#F0E8D0"/>
+    </linearGradient>
+
+    <!-- Scroll shadow -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#7a2a00" flood-opacity="0.28"/>
+    </filter>
+
+    <!-- Eye gloss -->
+    <radialGradient id="eyeGloss" cx="35%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <!-- Magnifier glass gradient -->
+    <linearGradient id="lensGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#D0EFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#A8D8F0" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#sq)">
+    <!-- Background -->
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <rect width="512" height="512" fill="url(#glow)"/>
+
+    <!-- Subtle bottom shade -->
+    <ellipse cx="256" cy="520" rx="220" ry="80" fill="#7a2a00" opacity="0.18"/>
+
+    <!-- ── Scroll / Document body ── -->
+    <g filter="url(#shadow)" transform="translate(256,258)">
+      <!-- Main scroll paper -->
+      <rect x="-118" y="-155" width="236" height="210" rx="28" ry="28" fill="url(#scrollGrad)"/>
+
+      <!-- Curled top edge -->
+      <path d="M-118,-155 Q-118,-185 -88,-175 L88,-175 Q118,-185 118,-155 Z"
+            fill="#F5EDCC" opacity="0.9"/>
+
+      <!-- Ruled lines on scroll -->
+      <rect x="-78" y="-110" width="156" height="9" rx="4" fill="#DDD5B8" opacity="0.7"/>
+      <rect x="-78" y="-88"  width="130" height="9" rx="4" fill="#DDD5B8" opacity="0.7"/>
+      <rect x="-78" y="-66"  width="144" height="9" rx="4" fill="#DDD5B8" opacity="0.7"/>
+      <rect x="-78" y="-44"  width="110" height="9" rx="4" fill="#DDD5B8" opacity="0.7"/>
+
+      <!-- Eyes container — placed in upper half of scroll -->
+      <!-- Left eye white -->
+      <ellipse cx="-34" cy="12" rx="34" ry="34" fill="#1A1612"/>
+      <ellipse cx="-34" cy="12" rx="26" ry="26" fill="#fff"/>
+      <ellipse cx="-34" cy="12" rx="16" ry="17" fill="#1A1612"/>
+      <ellipse cx="-34" cy="12" rx="6"  ry="6"  fill="#fff"/>
+      <!-- left eye gloss -->
+      <ellipse cx="-42" cy="4"  rx="5" ry="4"  fill="#fff" opacity="0.5"/>
+
+      <!-- Right eye -->
+      <ellipse cx="34" cy="12" rx="34" ry="34" fill="#1A1612"/>
+      <ellipse cx="34" cy="12" rx="26" ry="26" fill="#fff"/>
+      <ellipse cx="34" cy="12" rx="16" ry="17" fill="#1A1612"/>
+      <ellipse cx="34" cy="12" rx="6"  ry="6"  fill="#fff"/>
+      <!-- right eye gloss -->
+      <ellipse cx="26" cy="4"  rx="5" ry="4"  fill="#fff" opacity="0.5"/>
+
+      <!-- Cheek blushes -->
+      <ellipse cx="-76" cy="34" rx="18" ry="11" fill="#E87050" opacity="0.35"/>
+      <ellipse cx="76"  cy="34" rx="18" ry="11" fill="#E87050" opacity="0.35"/>
+
+      <!-- Smile -->
+      <path d="M-24,46 Q0,70 24,46" stroke="#1A1612" stroke-width="7" fill="none"
+            stroke-linecap="round"/>
+    </g>
+
+    <!-- ── Magnifying glass ── -->
+    <g transform="translate(348, 340) rotate(35)">
+      <!-- Handle -->
+      <rect x="-7" y="52" width="14" height="58" rx="7" fill="#C8420A"/>
+      <rect x="-7" y="52" width="14" height="58" rx="7" fill="url(#glow)" opacity="0.4"/>
+      <!-- Ring -->
+      <circle cx="0" cy="0" r="52" fill="none" stroke="#C8420A" stroke-width="16"/>
+      <circle cx="0" cy="0" r="44" fill="url(#lensGrad)"/>
+      <!-- Lens shine -->
+      <ellipse cx="-12" cy="-14" rx="14" ry="10" fill="#fff" opacity="0.55" transform="rotate(-20)"/>
+    </g>
+
+    <!-- Icon top shine overlay -->
+    <rect width="512" height="260" rx="116" ry="116"
+          fill="url(#glow)" opacity="0.18"/>
+  </g>
+</svg>
